@@ -1,3 +1,4 @@
+"use strict";
 var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
@@ -38,24 +39,39 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.fetchAaveMarketData = fetchAaveMarketData;
+exports.fetchCompoundMarketData = fetchCompoundMarketData;
 var _a = require("graphql-request"), request = _a.request, gql = _a.gql;
 require("dotenv").config();
 // SUBGRAPH ENDPOINT
-var AAVE_SUBGRAPH_URL = "https://gateway.thegraph.com/api/".concat(process.env.GRAPH_API_KEY, "/subgraphs/id/GQFbb95cE6d8mV989mL5figjaGaKCQB3xqYrr1bRyXqF");
-var aaveQuery = gql(__makeTemplateObject(["\n  query Reserves($symbol: String!) {\n    reserves(\n      first: 10,\n      where: { symbol: $symbol },\n      orderBy: liquidityRate,\n      orderDirection: desc\n    ) {\n      id\n      name\n      symbol\n      decimals\n      liquidityRate\n      totalATokenSupply\n      totalLiquidity\n      totalCurrentVariableDebt\n      availableLiquidity\n    }\n  }\n"], ["\n  query Reserves($symbol: String!) {\n    reserves(\n      first: 10,\n      where: { symbol: $symbol },\n      orderBy: liquidityRate,\n      orderDirection: desc\n    ) {\n      id\n      name\n      symbol\n      decimals\n      liquidityRate\n      totalATokenSupply\n      totalLiquidity\n      totalCurrentVariableDebt\n      availableLiquidity\n    }\n  }\n"]));
+var AAVE_SUBGRAPH_URL = "https://gateway.thegraph.com/api/".concat(process.env.GRAPH_API_KEY, "/subgraphs/id/JCNWRypm7FYwV8fx5HhzZPSFaMxgkPuw4TnR3Gpi81zk");
+var COMPOUND_SUBGRAPH_URL = "https://gateway.thegraph.com/api/".concat(process.env.GRAPH_API_KEY, "/subgraphs/id/AwoxEZbiWLvv6e3QdvdMZw4WDURdGbvPfHmZRc8Dpfz9");
+var messariMarketQuery = gql(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  query Markets($symbol: String!) {\n    markets(where: { inputToken_: { symbol: $symbol } }) {\n      id\n      inputToken {\n        symbol\n      }\n      totalDepositBalanceUSD\n      totalBorrowBalanceUSD\n      rates(where: { side: LENDER }) {\n        rate\n      }\n    }\n  }\n"], ["\n  query Markets($symbol: String!) {\n    markets(where: { inputToken_: { symbol: $symbol } }) {\n      id\n      inputToken {\n        symbol\n      }\n      totalDepositBalanceUSD\n      totalBorrowBalanceUSD\n      rates(where: { side: LENDER }) {\n        rate\n      }\n    }\n  }\n"])));
 function fetchAaveMarketData(symbol) {
     return __awaiter(this, void 0, void 0, function () {
-        var response, error_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var response, market, lendingRate, utilization, error_1;
+        var _a, _b, _c;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, request(AAVE_SUBGRAPH_URL, aaveQuery, { symbol: symbol })];
+                    _d.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, request(AAVE_SUBGRAPH_URL, messariMarketQuery, { symbol: symbol })];
                 case 1:
-                    response = _a.sent();
-                    return [2 /*return*/, response.reserves];
+                    response = _d.sent();
+                    market = (_a = response.markets) === null || _a === void 0 ? void 0 : _a[0];
+                    if (!market)
+                        return [2 /*return*/, null];
+                    lendingRate = parseFloat(((_c = (_b = market.rates) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.rate) || "0");
+                    utilization = parseFloat(market.totalBorrowBalanceUSD) / parseFloat(market.totalDepositBalanceUSD);
+                    return [2 /*return*/, {
+                            id: market.id,
+                            symbol: market.inputToken.symbol,
+                            lendingRate: lendingRate,
+                            utilization: utilization,
+                        }];
                 case 2:
-                    error_1 = _a.sent();
+                    error_1 = _d.sent();
                     console.error("Error querying AAVE subgraph:", error_1);
                     return [2 /*return*/, null];
                 case 3: return [2 /*return*/];
@@ -63,4 +79,35 @@ function fetchAaveMarketData(symbol) {
         });
     });
 }
-module.exports = { fetchAaveMarketData: fetchAaveMarketData };
+function fetchCompoundMarketData(symbol) {
+    return __awaiter(this, void 0, void 0, function () {
+        var response, market, lendingRate, utilization, error_2;
+        var _a, _b, _c;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
+                case 0:
+                    _d.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, request(COMPOUND_SUBGRAPH_URL, messariMarketQuery, { symbol: symbol })];
+                case 1:
+                    response = _d.sent();
+                    market = (_a = response.markets) === null || _a === void 0 ? void 0 : _a[0];
+                    if (!market)
+                        return [2 /*return*/, null];
+                    lendingRate = parseFloat(((_c = (_b = market.rates) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.rate) || "0");
+                    utilization = parseFloat(market.totalBorrowBalanceUSD) / parseFloat(market.totalDepositBalanceUSD);
+                    return [2 /*return*/, {
+                            id: market.id,
+                            symbol: market.inputToken.symbol,
+                            lendingRate: lendingRate,
+                            utilization: utilization,
+                        }];
+                case 2:
+                    error_2 = _d.sent();
+                    console.error("Error querying Compound subgraph:", error_2);
+                    return [2 /*return*/, null];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+var templateObject_1;

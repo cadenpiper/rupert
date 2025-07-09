@@ -1,12 +1,15 @@
-const { fetchAaveMarketData } = require("./graphQueries");
+import { fetchAaveMarketData, fetchCompoundMarketData } from "./graphQueries";
 
-async function testAaveQuery() {
+async function testMarketQueries() {
   try {
-    const data = await fetchAaveMarketData("USDC");
-    console.log("AAVE USDC Data:", JSON.stringify(data, null, 2));
+    const aaveData = await fetchAaveMarketData("USDC");
+    console.log("🔹 AAVE USDC Data:", JSON.stringify(aaveData, null, 2));
+
+    const compoundData = await fetchCompoundMarketData("USDC");
+    console.log("🔸 Compound USDC Data:", JSON.stringify(compoundData, null, 2));
   } catch (error) {
-    console.error("Error querying AAVE subgraph:", error);
+    console.error("Error querying subgraphs:", error);
   }
 }
 
-testAaveQuery();
+testMarketQueries();

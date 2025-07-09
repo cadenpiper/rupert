@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,26 +35,31 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var fetchAaveMarketData = require("./graphQueries").fetchAaveMarketData;
-function testAaveQuery() {
+Object.defineProperty(exports, "__esModule", { value: true });
+var graphQueries_1 = require("./graphQueries");
+function testMarketQueries() {
     return __awaiter(this, void 0, void 0, function () {
-        var data, error_1;
+        var aaveData, compoundData, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, fetchAaveMarketData("USDC")];
+                    _a.trys.push([0, 3, , 4]);
+                    return [4 /*yield*/, (0, graphQueries_1.fetchAaveMarketData)("USDC")];
                 case 1:
-                    data = _a.sent();
-                    console.log("AAVE USDC Data:", JSON.stringify(data, null, 2));
-                    return [3 /*break*/, 3];
+                    aaveData = _a.sent();
+                    console.log("🔹 AAVE USDC Data:", JSON.stringify(aaveData, null, 2));
+                    return [4 /*yield*/, (0, graphQueries_1.fetchCompoundMarketData)("USDC")];
                 case 2:
+                    compoundData = _a.sent();
+                    console.log("🔸 Compound USDC Data:", JSON.stringify(compoundData, null, 2));
+                    return [3 /*break*/, 4];
+                case 3:
                     error_1 = _a.sent();
-                    console.error("Error querying AAVE subgraph:", error_1);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+                    console.error("Error querying subgraphs:", error_1);
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
             }
         });
     });
 }
-testAaveQuery();
+testMarketQueries();
